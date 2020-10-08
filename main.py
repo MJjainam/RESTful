@@ -1,10 +1,19 @@
 #!/bin/python3
 
 import flask
+import pymongo
+import os
 from flask import request, jsonify
+# from bson import json_util
+
 
 app = flask.Flask(__name__)
 app.config["DEBUG"] = True
+mongodb_uri = os.getenv("MONGODB_URL")
+client = pymongo.MongoClient(mongodb_uri)
+db1 = client["restfuldb1"]
+#Use table1 to get countries
+table1 = col = db1["countries"]
 
 inventory = [
     {
@@ -27,7 +36,9 @@ def home():
 
 @app.route('/v1/get/all', methods=['GET'])
 def getAll():
-    return jsonify(inventory)
+    entries = table1.find().limit(10)
+    return jsonify(list(entries))
+    # return jsonify(inventory)
 
 @app.route('/v1/get', methods=['GET'])
 def api_id():
@@ -52,4 +63,12 @@ def api_id():
     # Python dictionaries to the JSON format.
     return jsonify(results)
 
-app.run(host="0.0.0.0")
+
+def main():
+    app.config["DEBUG"] = True
+    app.run(host="0.0.0.0")
+
+
+
+if __name__ == "__main__":
+    main()
